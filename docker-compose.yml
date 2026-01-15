@@ -32,5 +32,30 @@ services:
       - db
       - redis
 
+  worker:
+    build: .
+    command: celery -A app.celery_app worker --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-synergy}:${POSTGRES_PASSWORD:-synergy123}@db:5432/${POSTGRES_DB:-synergy_db}
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+
+  beat:
+    build: .
+    command: celery -A app.celery_app beat --loglevel=info
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-synergy}:${POSTGRES_PASSWORD:-synergy123}@db:5432/${POSTGRES_DB:-synergy_db}
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+      - worker
+
 volumes:
   postgres_data:

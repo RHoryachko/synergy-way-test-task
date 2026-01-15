@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from app.database import engine, Base
+from app.routers import health
 
 Base.metadata.create_all(bind=engine)
 
@@ -12,12 +13,9 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
+app.include_router(health.router)
+
 
 @app.get("/")
 def root():
     return {"message": "Synergy Way Test Task API"}
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
