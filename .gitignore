@@ -15,3 +15,7 @@ build/
 .vscode/
 *.db
 *.sqlite
+celerybeat-schedule
+celerybeat.pid
+celerybeat-schedule
+celerybeat.pid
