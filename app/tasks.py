@@ -33,7 +33,7 @@ def fetch_users(self):
     
     try:
         with httpx.Client() as client:
-            response = client.get(f"{settings.jsonplaceholder_url}/users")
+            response = client.get(f"{settings.jsonplaceholder_url}/users", timeout=30.0)
             response.raise_for_status()
             users_data = response.json()
 
