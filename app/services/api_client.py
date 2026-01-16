@@ -27,7 +27,8 @@ class APIClient:
         with httpx.Client(timeout=30.0) as client:
             response = client.get(
                 f"{settings.dummyjson_url}/comments",
-                params={"limit": limit, "skip": skip}
+                params={"limit": limit, "skip": skip},
+                timeout=30.0
             )
             response.raise_for_status()
             data = response.json()
