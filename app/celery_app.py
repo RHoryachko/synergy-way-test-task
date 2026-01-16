@@ -14,6 +14,7 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    include=["app.tasks"],
 )
 
 celery_app.conf.beat_schedule = {
