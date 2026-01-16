@@ -1,11 +1,13 @@
-import httpx
 from celery import Task
 from sqlalchemy.orm import Session
 
 from app.celery_app import celery_app
 from app.database import SessionLocal
 from app.models import User, Post, Comment
-from app.config import settings
+from app.services.user_service import UserService
+from app.services.post_service import PostService
+from app.services.comment_service import CommentService
+from app.services.api_client import APIClient
 
 
 class DatabaseTask(Task):
@@ -32,29 +34,10 @@ def fetch_users(self):
     db: Session = self.db
     
     try:
-        with httpx.Client() as client:
-            response = client.get(f"{settings.jsonplaceholder_url}/users", timeout=30.0)
-            response.raise_for_status()
-            users_data = response.json()
+        users_data = APIClient.get_users()
 
         for user_data in users_data:
-            user = db.query(User).filter(User.external_id == user_data["id"]).first()
-            if not user:
-                user = User(
-                    external_id=user_data["id"],
-                    name=user_data["name"],
-                    username=user_data["username"],
-                    email=user_data["email"],
-                    phone=user_data.get("phone"),
-                    website=user_data.get("website"),
-                )
-                db.add(user)
-            else:
-                user.name = user_data["name"]
-                user.username = user_data["username"]
-                user.email = user_data["email"]
-                user.phone = user_data.get("phone")
-                user.website = user_data.get("website")
+            UserService.create_or_update_user(db, user_data)
 
         db.commit()
         return f"Processed {len(users_data)} users"
@@ -71,15 +54,7 @@ def fetch_posts(self, limit: int = 10, skip: int = None):
         if skip is None:
             skip = get_last_processed_count(db, Post)
 
-        with httpx.Client() as client:
-            response = client.get(
-                f"{settings.dummyjson_url}/posts",
-                params={"limit": limit, "skip": skip},
-                timeout=30.0
-            )
-            response.raise_for_status()
-            data = response.json()
-            posts_data = data.get("posts", [])
+        posts_data = APIClient.get_posts(limit=limit, skip=skip)
 
         processed = 0
         for post_data in posts_data:
@@ -87,19 +62,9 @@ def fetch_posts(self, limit: int = 10, skip: int = None):
             if not user:
                 continue
 
-            post = db.query(Post).filter(Post.external_id == post_data["id"]).first()
-            if not post:
-                post = Post(
-                    external_id=post_data["id"],
-                    user_id=user.id,
-                    title=post_data["title"],
-                    body=post_data["body"],
-                )
-                db.add(post)
+            _, is_new = PostService.create_or_update_post(db, post_data, user)
+            if is_new:
                 processed += 1
-            else:
-                post.title = post_data["title"]
-                post.body = post_data["body"]
 
         db.commit()
         return f"Processed {processed} new posts (skip={skip})"
@@ -116,14 +81,7 @@ def fetch_comments(self, limit: int = 10, skip: int = None):
         if skip is None:
             skip = get_last_processed_count(db, Comment)
 
-        with httpx.Client() as client:
-            response = client.get(
-                f"{settings.dummyjson_url}/comments",
-                params={"limit": limit, "skip": skip}
-            )
-            response.raise_for_status()
-            data = response.json()
-            comments_data = data.get("comments", [])
+        comments_data = APIClient.get_comments(limit=limit, skip=skip)
 
         processed = 0
         for comment_data in comments_data:
@@ -138,18 +96,9 @@ def fetch_comments(self, limit: int = 10, skip: int = None):
                 if not user:
                     continue
 
-            comment = db.query(Comment).filter(Comment.external_id == comment_data["id"]).first()
-            if not comment:
-                comment = Comment(
-                    external_id=comment_data["id"],
-                    post_id=post.id,
-                    user_id=user.id,
-                    body=comment_data["body"],
-                )
-                db.add(comment)
+            _, is_new = CommentService.create_or_update_comment(db, comment_data, post, user)
+            if is_new:
                 processed += 1
-            else:
-                comment.body = comment_data["body"]
 
         db.commit()
         return f"Processed {processed} new comments (skip={skip})"
