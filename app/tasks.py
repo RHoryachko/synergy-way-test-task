@@ -74,7 +74,8 @@ def fetch_posts(self, limit: int = 10, skip: int = None):
         with httpx.Client() as client:
             response = client.get(
                 f"{settings.dummyjson_url}/posts",
-                params={"limit": limit, "skip": skip}
+                params={"limit": limit, "skip": skip},
+                timeout=30.0
             )
             response.raise_for_status()
             data = response.json()
