@@ -8,4 +8,7 @@ psycopg2-binary==2.9.9
 celery==5.3.4
 redis==5.0.1
 httpx==0.25.2
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-asyncio==0.21.1
 flake8==6.1.0
