@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 
 
@@ -11,11 +11,10 @@ class UserBase(BaseModel):
 
 
 class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     external_id: int
-
-    class Config:
-        from_attributes = True
 
 
 class PostBase(BaseModel):
@@ -24,12 +23,11 @@ class PostBase(BaseModel):
 
 
 class Post(PostBase):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     external_id: int
     user_id: int
-
-    class Config:
-        from_attributes = True
 
 
 class CommentBase(BaseModel):
@@ -37,13 +35,12 @@ class CommentBase(BaseModel):
 
 
 class Comment(CommentBase):
+    model_config = ConfigDict(from_attributes=True)
+    
     id: int
     external_id: int
     post_id: int
     user_id: int
-
-    class Config:
-        from_attributes = True
 
 
 class UserWithPosts(User):
