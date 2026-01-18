@@ -66,9 +66,9 @@ def test_fetch_users(db, mock_users_response):
 
         mock_self = MagicMock()
         mock_self._db = db
-        mock_self.db = db
+        type(mock_self).db = property(lambda self: db)
 
-        result = fetch_users.run(mock_self)
+        result = fetch_users(mock_self)
 
         assert "Processed" in result
         user = db.query(User).filter(User.external_id == 1).first()
@@ -82,9 +82,9 @@ def test_fetch_posts(db, sample_user, mock_posts_response):
 
         mock_self = MagicMock()
         mock_self._db = db
-        mock_self.db = db
+        type(mock_self).db = property(lambda self: db)
 
-        result = fetch_posts.run(mock_self, limit=10, skip=0)
+        result = fetch_posts(mock_self, limit=10, skip=0)
 
         assert "Processed" in result
         post = db.query(Post).filter(Post.external_id == 1).first()
@@ -98,9 +98,9 @@ def test_fetch_comments(db, sample_user, sample_post, mock_comments_response):
 
         mock_self = MagicMock()
         mock_self._db = db
-        mock_self.db = db
+        type(mock_self).db = property(lambda self: db)
 
-        result = fetch_comments.run(mock_self, limit=10, skip=0)
+        result = fetch_comments(mock_self, limit=10, skip=0)
 
         assert "Processed" in result
         comment = db.query(Comment).filter(Comment.external_id == 1).first()
