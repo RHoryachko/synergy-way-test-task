@@ -25,11 +25,11 @@ celery_app.conf.beat_schedule = {
     "fetch-posts": {
         "task": "app.tasks.fetch_posts",
         "schedule": 600.0,
-        "kwargs": {"limit": 10},
+        "kwargs": {"limit": 30},
     },
     "fetch-comments": {
         "task": "app.tasks.fetch_comments",
         "schedule": 600.0,
-        "kwargs": {"limit": 10},
+        "kwargs": {"limit": 30},
     },
 }
