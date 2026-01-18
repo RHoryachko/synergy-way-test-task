@@ -1,0 +1,88 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-synergy}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-synergy123}
+      POSTGRES_DB: ${POSTGRES_DB:-synergy_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-synergy}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-synergy}:${POSTGRES_PASSWORD:-synergy123}@db:5432/${POSTGRES_DB:-synergy_db}
+      - REDIS_URL=redis://redis:6379/0
+      - ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  worker:
+    build: .
+    command: celery -A app.celery_app worker --loglevel=info --include=app.tasks --concurrency=4
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-synergy}:${POSTGRES_PASSWORD:-synergy123}@db:5432/${POSTGRES_DB:-synergy_db}
+      - REDIS_URL=redis://redis:6379/0
+      - ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  beat:
+    build: .
+    command: celery -A app.celery_app beat --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-synergy}:${POSTGRES_PASSWORD:-synergy123}@db:5432/${POSTGRES_DB:-synergy_db}
+      - REDIS_URL=redis://redis:6379/0
+      - ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      worker:
+        condition: service_started
+    restart: unless-stopped
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
