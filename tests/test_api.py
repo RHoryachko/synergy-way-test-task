@@ -1,5 +1,3 @@
-import pytest
-from app.models import User, Post, Comment
 
 
 def test_get_users(client, sample_user):

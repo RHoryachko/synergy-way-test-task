@@ -33,5 +33,3 @@ celery_app.conf.beat_schedule = {
         "kwargs": {"limit": 10},
     },
 }
-
-from app import tasks
