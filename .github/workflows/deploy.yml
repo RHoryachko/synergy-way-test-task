@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Deploy to EC2
+      env:
+        EC2_HOST: ${{ secrets.EC2_HOST }}
+        EC2_USER: ${{ secrets.EC2_USER }}
+        SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+        
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
+          cd ~/synergy-way-test-task
+          git pull origin main || git pull origin master
+          
+          docker build -t synergy-way-test-task-web .
+          docker build -t synergy-way-test-task-worker .
+          docker build -t synergy-way-test-task-beat .
+          
+          docker-compose -f docker-compose.prod.yml up -d
+        EOF
