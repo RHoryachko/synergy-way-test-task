@@ -35,7 +35,7 @@ def get_last_processed_count(db: Session, model_class):
 @celery_app.task(base=DatabaseTask, bind=True)
 def fetch_users(self):
     db: Session = self.db
-    
+
     try:
         logger.info("Starting fetch_users task")
         users_data = APIClient.get_users()
@@ -56,7 +56,7 @@ def fetch_users(self):
 @celery_app.task(base=DatabaseTask, bind=True)
 def fetch_posts(self, limit: int = 10, skip: int = None):
     db: Session = self.db
-    
+
     try:
         if skip is None:
             skip = get_last_processed_count(db, Post)
@@ -88,7 +88,7 @@ def fetch_posts(self, limit: int = 10, skip: int = None):
 @celery_app.task(base=DatabaseTask, bind=True)
 def fetch_comments(self, limit: int = 10, skip: int = None):
     db: Session = self.db
-    
+
     try:
         if skip is None:
             skip = get_last_processed_count(db, Comment)
