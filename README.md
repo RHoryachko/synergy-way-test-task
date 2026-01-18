@@ -83,7 +83,7 @@ Once the application is running, you can access the API at `http://localhost:800
 
 ### Database Administration
 
-Adminer is available at `http://localhost:8080` for database management. Login credentials:
+Adminer is available at `http://localhost:8081` for database management. Login credentials:
 
 - **System**: PostgreSQL
 - **Server**: db

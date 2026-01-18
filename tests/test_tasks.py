@@ -1,4 +1,5 @@
 import pytest
+import inspect
 from unittest.mock import patch, MagicMock
 
 try:
@@ -68,7 +69,13 @@ def test_fetch_users(db, mock_users_response):
         mock_self._db = db
         type(mock_self).db = property(lambda self: db)
 
-        result = fetch_users(mock_self)
+        func = getattr(fetch_users.run, '__wrapped__', None)
+        if func is None:
+            func = getattr(fetch_users.run, '__func__', None)
+        if func is None:
+            func = inspect.unwrap(fetch_users.run)
+
+        result = func(mock_self)
 
         assert "Processed" in result
         user = db.query(User).filter(User.external_id == 1).first()
@@ -84,7 +91,13 @@ def test_fetch_posts(db, sample_user, mock_posts_response):
         mock_self._db = db
         type(mock_self).db = property(lambda self: db)
 
-        result = fetch_posts(mock_self, limit=10, skip=0)
+        func = getattr(fetch_posts.run, '__wrapped__', None)
+        if func is None:
+            func = getattr(fetch_posts.run, '__func__', None)
+        if func is None:
+            func = inspect.unwrap(fetch_posts.run)
+
+        result = func(mock_self, limit=10, skip=0)
 
         assert "Processed" in result
         post = db.query(Post).filter(Post.external_id == 1).first()
@@ -100,7 +113,13 @@ def test_fetch_comments(db, sample_user, sample_post, mock_comments_response):
         mock_self._db = db
         type(mock_self).db = property(lambda self: db)
 
-        result = fetch_comments(mock_self, limit=10, skip=0)
+        func = getattr(fetch_comments.run, '__wrapped__', None)
+        if func is None:
+            func = getattr(fetch_comments.run, '__func__', None)
+        if func is None:
+            func = inspect.unwrap(fetch_comments.run)
+
+        result = func(mock_self, limit=10, skip=0)
 
         assert "Processed" in result
         comment = db.query(Comment).filter(Comment.external_id == 1).first()
