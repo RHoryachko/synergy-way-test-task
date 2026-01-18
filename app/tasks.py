@@ -68,7 +68,7 @@ def fetch_posts(self, limit: int = 30, skip: int = None):
         while skip < max_skip:
             logger.info(f"Starting fetch_posts task with limit={batch_limit}, skip={skip}")
             posts_data = APIClient.get_posts(limit=batch_limit, skip=skip)
-            
+
             if not posts_data:
                 logger.info("No more posts to fetch")
                 break
@@ -87,11 +87,11 @@ def fetch_posts(self, limit: int = 30, skip: int = None):
 
             db.commit()
             total_processed += processed
-            
+
             if processed > 0:
                 logger.info(f"Successfully processed {processed} new posts in this batch")
                 break
-            
+
             skip += batch_limit
 
         logger.info(f"Total processed {total_processed} new posts")
@@ -117,7 +117,7 @@ def fetch_comments(self, limit: int = 30, skip: int = None):
         while skip < max_skip:
             logger.info(f"Starting fetch_comments task with limit={batch_limit}, skip={skip}")
             comments_data = APIClient.get_comments(limit=batch_limit, skip=skip)
-            
+
             if not comments_data:
                 logger.info("No more comments to fetch")
                 break
@@ -144,11 +144,11 @@ def fetch_comments(self, limit: int = 30, skip: int = None):
 
             db.commit()
             total_processed += processed
-            
+
             if processed > 0:
                 logger.info(f"Successfully processed {processed} new comments in this batch")
                 break
-            
+
             skip += batch_limit
 
         logger.info(f"Total processed {total_processed} new comments")
