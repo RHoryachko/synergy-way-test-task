@@ -55,7 +55,7 @@ This will start:
 - FastAPI web server (port 8000)
 - Celery worker
 - Celery beat scheduler
-- Adminer - Database management UI (port 8080)
+- Adminer - Database management UI (port 8081)
 
 ## API Endpoints
 
@@ -81,17 +81,28 @@ Once the application is running, you can access the API at `http://localhost:800
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
 
-### Database Administration
+### Database Administration (Adminer)
 
-Adminer is available at `http://localhost:8081` for database management. Login credentials:
+Adminer provides a web-based interface for managing the PostgreSQL database without needing to write SQL queries or use command-line tools.
 
-- **System**: PostgreSQL
-- **Server**: db
-- **Username**: synergy (or your `POSTGRES_USER`)
-- **Password**: synergy123 (or your `POSTGRES_PASSWORD`)
-- **Database**: synergy_db (or your `POSTGRES_DB`)
+**Access Adminer:**
+- URL: `http://localhost:8081` (development) or `http://your-server-ip:8081` (production)
 
-You can view, edit, and manage all database tables through the web interface without writing any code.
+**Login Credentials:**
+- **System**: `PostgreSQL`
+- **Server**: `db`
+- **Username**: `synergy` (or your `POSTGRES_USER` from `.env`)
+- **Password**: `synergy123` (or your `POSTGRES_PASSWORD` from `.env`)
+- **Database**: `synergy_db` (or your `POSTGRES_DB` from `.env`)
+
+**Features:**
+- Browse and view all tables (users, posts, comments)
+- Execute SQL queries directly
+- View table structure and relationships
+- Edit, insert, and delete records through a user-friendly interface
+- Export data in various formats
+
+Adminer is particularly useful for inspecting the data collected by the periodic Celery tasks and verifying that users, posts, and comments are being stored correctly.
 
 ## Scheduled Tasks
 
