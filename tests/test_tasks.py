@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 try:
     from app.tasks import fetch_users, fetch_posts, fetch_comments
@@ -64,9 +64,11 @@ def test_fetch_users(db, mock_users_response):
     with patch("app.services.api_client.APIClient.get_users") as mock_get_users:
         mock_get_users.return_value = mock_users_response
 
-        task = fetch_users
-        task.db = db
-        result = task()
+        mock_self = MagicMock()
+        mock_self._db = db
+        mock_self.db = db
+
+        result = fetch_users.run(mock_self)
 
         assert "Processed" in result
         user = db.query(User).filter(User.external_id == 1).first()
@@ -78,9 +80,11 @@ def test_fetch_posts(db, sample_user, mock_posts_response):
     with patch("app.services.api_client.APIClient.get_posts") as mock_get_posts:
         mock_get_posts.return_value = mock_posts_response["posts"]
 
-        task = fetch_posts
-        task.db = db
-        result = task(limit=10, skip=0)
+        mock_self = MagicMock()
+        mock_self._db = db
+        mock_self.db = db
+
+        result = fetch_posts.run(mock_self, limit=10, skip=0)
 
         assert "Processed" in result
         post = db.query(Post).filter(Post.external_id == 1).first()
@@ -92,9 +96,11 @@ def test_fetch_comments(db, sample_user, sample_post, mock_comments_response):
     with patch("app.services.api_client.APIClient.get_comments") as mock_get_comments:
         mock_get_comments.return_value = mock_comments_response["comments"]
 
-        task = fetch_comments
-        task.db = db
-        result = task(limit=10, skip=0)
+        mock_self = MagicMock()
+        mock_self._db = db
+        mock_self.db = db
+
+        result = fetch_comments.run(mock_self, limit=10, skip=0)
 
         assert "Processed" in result
         comment = db.query(Comment).filter(Comment.external_id == 1).first()
