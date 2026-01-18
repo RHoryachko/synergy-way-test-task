@@ -55,6 +55,7 @@ This will start:
 - FastAPI web server (port 8000)
 - Celery worker
 - Celery beat scheduler
+- Adminer - Database management UI (port 8080)
 
 ## API Endpoints
 
@@ -79,6 +80,18 @@ Once the application is running, you can access the API at `http://localhost:800
 ### API Documentation
 - Swagger UI: `http://localhost:8000/docs`
 - ReDoc: `http://localhost:8000/redoc`
+
+### Database Administration
+
+Adminer is available at `http://localhost:8080` for database management. Login credentials:
+
+- **System**: PostgreSQL
+- **Server**: db
+- **Username**: synergy (or your `POSTGRES_USER`)
+- **Password**: synergy123 (or your `POSTGRES_PASSWORD`)
+- **Database**: synergy_db (or your `POSTGRES_DB`)
+
+You can view, edit, and manage all database tables through the web interface without writing any code.
 
 ## Scheduled Tasks
 
